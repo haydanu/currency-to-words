@@ -54,11 +54,11 @@ namespace UsdCurrencyToWords
             else
             {
                 getTensCurrency = (int)Math.Floor(_currency / 10.0);
-                tensWords = tens[getTensCurrency] + "-" + units[getRemainderCurrency] + " " + dollars;
+                tensWords = " and " + tens[getTensCurrency] + "-" + units[getRemainderCurrency] + " " + dollars;
             }
             return tensWords.Trim();
         }
-        private string GetDecimalWords(int _decimalNumber)
+        public string GetDecimalWords(int _decimalNumber)
         {
             string decimalWords;
             if (_decimalNumber != 0)
@@ -105,14 +105,15 @@ namespace UsdCurrencyToWords
 
             if (_currency < 20)
             {
-                if (_currency == 1)
-                {
-                    words = units[_currency] + " " + dollar + " " + GetDecimalWords(_decimalNumber);
-                }
-                else
-                {
-                    words = units[_currency] + " " + dollars + " " + GetDecimalWords(_decimalNumber);
-                }
+                GetTensWords(_currency);
+                //if (_currency == 1)
+                //{
+                //    words = units[_currency] + " " + dollar + " " + GetDecimalWords(_decimalNumber);
+                //}
+                //else
+                //{
+                //    words = units[_currency] + " " + dollars + " " + GetDecimalWords(_decimalNumber);
+                //}
             }
 
             if (_currency >= 20 & _currency < 100)

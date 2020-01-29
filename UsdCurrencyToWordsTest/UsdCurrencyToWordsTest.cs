@@ -24,6 +24,32 @@ namespace UsdCurrencyToWordsTest
                 Assert.AreEqual(expected.ContainsKey(kvp.Key), actual.ContainsKey(kvp.Key));
                 Assert.AreEqual(expected.ContainsValue(kvp.Value), actual.ContainsValue(kvp.Value));
             }
+        }
+
+        [TestMethod]
+        public void CheckIfNumberIsDecimalAndGetTheWords()
+        {
+            int inputSingleDigit = 1;
+            int inputDoubleDigit = 20;
+
+            CurrencyToWords changeCurrencyToWords = new CurrencyToWords();
+
+            string actualSingleDigitWords = changeCurrencyToWords.GetDecimalWords(inputSingleDigit);
+            string actualDoubleDigitWords = changeCurrencyToWords.GetDecimalWords(inputDoubleDigit);
+
+            string expectedSingleDigitWords = "and one cent";
+            string expectedDoubleDigitWords = "and twenty- cents";
+
+            Assert.AreEqual(expectedSingleDigitWords, actualSingleDigitWords);
+            Assert.AreEqual(expectedDoubleDigitWords, actualDoubleDigitWords);
+
+        }
+
+
+        [TestMethod]
+
+        public void CheckIfNumberIsTensAndGetTheWords()
+        {
 
         }
 
