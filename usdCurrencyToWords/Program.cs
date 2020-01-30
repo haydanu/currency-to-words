@@ -15,8 +15,20 @@ namespace UsdCurrencyToWords
 
         public Dictionary<string, int> CheckNumber(string currency)
         {
-            Dictionary<string, int> _currency = new Dictionary<string, int>();
+            if (string.IsNullOrEmpty(currency))
+            {
+                throw new FormatException("Input can't be empty");
+            }
 
+            Regex charPattern = new Regex(@"[a-z]", RegexOptions.IgnoreCase);
+            MatchCollection matchesChar = charPattern.Matches(currency);
+
+            if (matchesChar.Count >= 1)
+            {
+                throw new FormatException("Input only accept number or decimal with 2 numbers");
+            }
+
+            Dictionary<string, int> _currency = new Dictionary<string, int>();
 
             if (currency.Contains("."))
             {
@@ -35,26 +47,23 @@ namespace UsdCurrencyToWords
                 _currency["decimalNumber"] = 0;
 
             }
-
             return _currency;
         }
-        private string GetTensWords(int _currency)
+        public string GetTensWords(int _currency)
         {
             string tensWords;
-            int getUnitsCurrency;
             int getTensCurrency;
             int getRemainderCurrency = _currency % 10;
+            string sentences = _currency.ToString().Length == 1 ? _currency <= 1 ? dollar : dollars : dollars;
 
-            if (_currency.ToString().Length == 1)
+            if (_currency < 20)
             {
-                getUnitsCurrency = (int)Math.Floor(_currency / 1.0);
-                string sentences = getUnitsCurrency == 1 ? dollar : dollars;
-                tensWords = " and " + units[getUnitsCurrency] + " " + sentences;
+                tensWords = " and " + units[_currency] + " " + sentences;
             }
             else
             {
                 getTensCurrency = (int)Math.Floor(_currency / 10.0);
-                tensWords = " and " + tens[getTensCurrency] + "-" + units[getRemainderCurrency] + " " + dollars;
+                tensWords = " and " + tens[getTensCurrency] + "-" + units[getRemainderCurrency] + " " + sentences;
             }
             return tensWords.Trim();
         }
@@ -84,6 +93,7 @@ namespace UsdCurrencyToWords
         }
         public string ChangeCurrencyToWords(string currency)
         {
+
             Dictionary<string, int> _currencyString = CheckNumber(currency);
 
             int _currency = _currencyString["number"];
@@ -105,15 +115,14 @@ namespace UsdCurrencyToWords
 
             if (_currency < 20)
             {
-                GetTensWords(_currency);
-                //if (_currency == 1)
-                //{
-                //    words = units[_currency] + " " + dollar + " " + GetDecimalWords(_decimalNumber);
-                //}
-                //else
-                //{
-                //    words = units[_currency] + " " + dollars + " " + GetDecimalWords(_decimalNumber);
-                //}
+                if (_currency == 1)
+                {
+                    words = units[_currency] + " " + dollar + " " + GetDecimalWords(_decimalNumber);
+                }
+                else
+                {
+                    words = units[_currency] + " " + dollars + " " + GetDecimalWords(_decimalNumber);
+                }
             }
 
             if (_currency >= 20 & _currency < 100)
@@ -147,7 +156,13 @@ namespace UsdCurrencyToWords
         }
         public static void Main()
         {
-            while (true)
+            CurrencyToWords Usd = new CurrencyToWords();
+            bool endApp = false;
+
+            Console.WriteLine("Console USD Currency To Words in C#\r");
+            Console.WriteLine("------------------------\n");
+
+            while (!endApp)
             {
                 try
                 {
@@ -155,32 +170,28 @@ namespace UsdCurrencyToWords
                     string userInput = Console.ReadLine();
                     Console.WriteLine("\t");
 
-                    CurrencyToWords Usd = new CurrencyToWords();
-
                     Usd.ChangeCurrencyToWords(userInput);
 
                     Console.WriteLine("\t");
 
                     Console.WriteLine("\ta - Try again");
                     Console.WriteLine("\tq - Quit");
-
                     Console.Write("Your option? ");
 
                     userInput = Console.ReadLine();
-                    
 
                     if (userInput == "q")
                     {
+                        endApp = true;
                         break;
                     };
-
-                    Console.ReadKey();
                 }
-                catch (FormatException)
+                catch (FormatException e)
                 {
-                    Console.WriteLine("Please input a valid number");
+                    Console.WriteLine(e.Message);
                 }
             }
+            return;
         }
     }
 }
