@@ -7,66 +7,8 @@ namespace UsdCurrencyToWordsTest
     [TestClass]
     public class UsdCurrencyToWordsTest
     {
-        [TestMethod]
-        public void CheckIfInputNumberIsIntegers()
-        {
-            CurrencyToWords changeCurrencyToWords = new CurrencyToWords();
-
-            string inputNumber = "123";
-
-            Dictionary<string, int> expected = new Dictionary<string, int> { { "number", 123 }, { "decimalNumber", 0 } };
-
-            Dictionary<string, int> actual = changeCurrencyToWords.CheckNumber(inputNumber);
-
-            foreach (KeyValuePair<string, int> kvp in actual)
-            {
-                Assert.AreEqual(expected.ContainsKey(kvp.Key), actual.ContainsKey(kvp.Key));
-                Assert.AreEqual(expected.ContainsValue(kvp.Value), actual.ContainsValue(kvp.Value));
-            }
-        }
-
-        [TestMethod]
-        public void CheckIfInputNumberIsDecimals()
-        {
-            CurrencyToWords changeCurrencyToWords = new CurrencyToWords();
-
-            string inputNumber = "123.45";
-
-            Dictionary<string, int> expected = new Dictionary<string, int> { { "number", 123 }, { "decimalNumber", 45 } };
-
-            Dictionary<string, int> actual = changeCurrencyToWords.CheckNumber(inputNumber);
-
-            foreach (KeyValuePair<string, int> kvp in actual)
-            {
-                Assert.AreEqual(expected.ContainsKey(kvp.Key), actual.ContainsKey(kvp.Key));
-                Assert.AreEqual(expected.ContainsValue(kvp.Value), actual.ContainsValue(kvp.Value));
-            }
-        }
-
-        [TestMethod]
-        public void CheckIfNumberIsDecimalAndGetTheWords()
-        {
-            CurrencyToWords changeCurrencyToWords = new CurrencyToWords();
-
-            int inputSingleDigit = 1;
-            int inputDoubleDigit = 20;
-
-            string actualSingleDigitWords = changeCurrencyToWords.GetDecimalWords(inputSingleDigit);
-            string actualDoubleDigitWords = changeCurrencyToWords.GetDecimalWords(inputDoubleDigit);
-
-            string expectedSingleDigitWords = "and one cent";
-            string expectedDoubleDigitWords = "and twenty- cents";
-
-            Assert.AreEqual(expectedSingleDigitWords, actualSingleDigitWords);
-            Assert.AreEqual(expectedSingleDigitWords.Contains("cent"), actualSingleDigitWords.Contains("cent"));
-            Assert.AreEqual(expectedDoubleDigitWords, actualDoubleDigitWords);
-            Assert.AreEqual(expectedDoubleDigitWords.Contains("cents"), actualDoubleDigitWords.Contains("cents"));
-        }
-
-
-        [TestMethod]
-
-        public void CheckIfUserInputIsInvalid()
+        [TestMethod] // 1
+        public void CheckIfUserInputIsEmptyString()
         {
             CurrencyToWords changeCurrencyToWords = new CurrencyToWords();
 
@@ -83,9 +25,82 @@ namespace UsdCurrencyToWordsTest
             Assert.Fail("The expected exception was not thrown.");
         }
 
-        [TestMethod]
+        [TestMethod] // 2
+        public void CheckIfUserInputIsNotAValidNumber()
+        {
+            CurrencyToWords changeCurrencyToWords = new CurrencyToWords();
 
-        public void CheckIfInputIsDoubleDigitsAndGetWords()
+            try
+            {
+                changeCurrencyToWords.ChangeCurrencyToWords("123.4S");
+            }
+            catch (System.FormatException e)
+            {
+                StringAssert.Contains(e.Message, "Input only accept number or decimal with 2 numbers");
+                return;
+            }
+
+            Assert.Fail("The expected exception was not thrown.");
+        }
+
+        [TestMethod] // 3
+        public void CheckIfInputNumberIsInteger()
+        {
+            CurrencyToWords changeCurrencyToWords = new CurrencyToWords();
+
+            string inputNumber = "123";
+
+            Dictionary<string, int> expected = new Dictionary<string, int> { { "number", 123 }, { "decimalNumber", 0 } };
+
+            Dictionary<string, int> actual = changeCurrencyToWords.CheckNumber(inputNumber);
+
+            foreach (KeyValuePair<string, int> kvp in actual)
+            {
+                Assert.AreEqual(expected.ContainsKey(kvp.Key), actual.ContainsKey(kvp.Key));
+                Assert.AreEqual(expected.ContainsValue(kvp.Value), actual.ContainsValue(kvp.Value));
+            }
+        }
+
+        [TestMethod] // 4
+        public void CheckIfInputNumberIsDecimal()
+        {
+            CurrencyToWords changeCurrencyToWords = new CurrencyToWords();
+
+            string inputNumber = "123.45";
+
+            Dictionary<string, int> expected = new Dictionary<string, int> { { "number", 123 }, { "decimalNumber", 45 } };
+
+            Dictionary<string, int> actual = changeCurrencyToWords.CheckNumber(inputNumber);
+
+            foreach (KeyValuePair<string, int> kvp in actual)
+            {
+                Assert.AreEqual(expected.ContainsKey(kvp.Key), actual.ContainsKey(kvp.Key));
+                Assert.AreEqual(expected.ContainsValue(kvp.Value), actual.ContainsValue(kvp.Value));
+            }
+        }
+
+        [TestMethod] // 5
+        public void CheckIfNumberIsDecimalAndGetTheWords()
+        {
+            CurrencyToWords changeCurrencyToWords = new CurrencyToWords();
+
+            int inputSingleDigit = 1;
+            int inputDoubleDigit = 20;
+
+            string actualSingleDigitWords = changeCurrencyToWords.GetDecimalWords(inputSingleDigit);
+            string actualDoubleDigitWords = changeCurrencyToWords.GetDecimalWords(inputDoubleDigit);
+
+            string expectedSingleDigitWords = "and one cent";
+            string expectedDoubleDigitWords = "and twenty cents";
+
+            Assert.AreEqual(expectedSingleDigitWords, actualSingleDigitWords);
+            Assert.AreEqual(expectedSingleDigitWords.Contains("cent"), actualSingleDigitWords.Contains("cent"));
+            Assert.AreEqual(expectedDoubleDigitWords, actualDoubleDigitWords);
+            Assert.AreEqual(expectedDoubleDigitWords.Contains("cents"), actualDoubleDigitWords.Contains("cents"));
+        }
+
+        [TestMethod] // 6
+        public void CheckIfInputIsDoubleDigitsInHundredAndGetWords()
         {
             CurrencyToWords usd = new CurrencyToWords();
             int number = 24;
@@ -96,8 +111,7 @@ namespace UsdCurrencyToWordsTest
             Assert.AreEqual(expected, actual);
         }
 
-        [TestMethod]
-
+        [TestMethod] // 7
         public void GetWordsWhenInputIsValid()
         {
             CurrencyToWords usd = new CurrencyToWords();
@@ -108,7 +122,5 @@ namespace UsdCurrencyToWordsTest
 
             Assert.AreEqual(expected, actual.ToLower().Trim());
         }
-
-
     }
 }

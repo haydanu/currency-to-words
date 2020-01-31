@@ -55,6 +55,7 @@ namespace UsdCurrencyToWords
             int getTensCurrency;
             int getRemainderCurrency = _currency % 10;
             string sentences = _currency.ToString().Length == 1 ? _currency <= 1 ? dollar : dollars : dollars;
+            string seperator = _currency % 10 == 0 ? "" : "-";
 
             if (_currency < 20)
             {
@@ -63,7 +64,7 @@ namespace UsdCurrencyToWords
             else
             {
                 getTensCurrency = (int)Math.Floor(_currency / 10.0);
-                tensWords = " and " + tens[getTensCurrency] + "-" + units[getRemainderCurrency] + " " + sentences;
+                tensWords = " and " + tens[getTensCurrency] + seperator + units[getRemainderCurrency] + " " + sentences;
             }
             return tensWords.Trim();
         }
@@ -82,7 +83,8 @@ namespace UsdCurrencyToWords
                 {
                     int getDecimalTens = (int)Math.Floor(_decimalNumber / 10.0);
                     int getRemainderDecimal = _decimalNumber % 10;
-                    decimalWords = " and " + tens[getDecimalTens] + "-" + units[getRemainderDecimal] + " " + cents;
+                    string seperator = _decimalNumber % 10 == 0 ? "" : "-";
+                    decimalWords = " and " + tens[getDecimalTens] + seperator + units[getRemainderDecimal] + " " + cents;
                 }
             }
             else
