@@ -8,157 +8,188 @@ namespace UsdCurrencyToWords
     {
         private readonly string[] units = { "", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen" };
         private readonly string[] tens = { "", "", "twenty", "thirty", "fourty", "fifty", "sixty", "seventy", "eighty", "ninety" };
+        private readonly string[] largeNumbers = { "", "thousand", "million", "billion", "trillion", "quadrillion", "quintillion", "sextillion", "septillion", "octillion", "nonillion", "decillion", "undecillion", "duodecillion", "tredecillion", "Quattuordecillion", "Quindecillion", "Sexdecillion", "Septdecillion", "Octodecillion", "Novemdecillion", "Vigintillion" };
         private readonly string cent = "cent";
         private readonly string cents = "cents";
         private readonly string dollar = "dollar";
         private readonly string dollars = "dollars";
 
-        public Dictionary<string, int> CheckNumber(string currency)
+
+
+        public Dictionary<string, double> CheckNumber(string currency)
         {
+            // check if currency is null or not
             if (string.IsNullOrEmpty(currency))
             {
                 throw new FormatException("Input can't be empty");
             }
 
+            // find any aplhabet in input 
             Regex charPattern = new Regex(@"[a-z]", RegexOptions.IgnoreCase);
             MatchCollection matchesChar = charPattern.Matches(currency);
 
+            // if alphabet found
             if (matchesChar.Count >= 1)
             {
                 throw new FormatException("Input only accept number or decimal with 2 numbers");
             }
 
-            Dictionary<string, int> _currency = new Dictionary<string, int>();
+            
+
+            // change data type to double
+            Dictionary<string, double> _currencyObj = new Dictionary<string, double>();
 
             if (currency.Contains("."))
             {
+
                 Regex decimalPattern = new Regex(@"\b\d+\b");
                 MatchCollection matches = decimalPattern.Matches(currency);
 
                 if (matches.Count != 1)
                 {
-                    _currency["number"] = Convert.ToInt32(matches[0].Value);
-                    _currency["decimalNumber"] = Convert.ToInt32(matches[1].Value);
+                    
+                    _currencyObj["number"] = double.Parse(matches[0].Value);
+                    _currencyObj["decimalNumber"] = double.Parse(matches[1].Value);
                 }
             }
             else
             {
-                _currency["number"] = Convert.ToInt32(currency);
-                _currency["decimalNumber"] = 0;
+                _currencyObj["number"] = double.Parse(currency);
+                _currencyObj["decimalNumber"] = 0;
+            }
 
+            if (currency.Length > 14)
+            {
+                Console.WriteLine(ulong.Parse(currency) + "quintillion");
+                // cannot ! Console.WriteLine(double.Parse(currency) + "quintillion");
+                Console.WriteLine(decimal.Parse(currency) + "quintillion");
             }
-            return _currency;
-        }
-        public string GetTensWords(int _currency)
-        {
-            string tensWords;
-            int getTensCurrency;
-            int getRemainderCurrency = _currency % 10;
-            string sentences = _currency.ToString().Length == 1 ? _currency <= 1 ? dollar : dollars : dollars;
-            string seperator = _currency % 10 == 0 ? "" : "-";
 
-            if (_currency < 20)
-            {
-                tensWords = " and " + units[_currency] + " " + sentences;
-            }
-            else
-            {
-                getTensCurrency = (int)Math.Floor(_currency / 10.0);
-                tensWords = " and " + tens[getTensCurrency] + seperator + units[getRemainderCurrency] + " " + sentences;
-            }
-            return tensWords.Trim();
+            return _currencyObj;
         }
+
+        //public string GetTensWords(int _currency)
+        //{
+        //    string tensWords;
+        //    string sentences = _currency.ToString().Length == 1 ? _currency <= 1 ? dollar : dollars : dollars;
+
+        //    if (_currency < 20)
+        //    {
+        //        tensWords = " and " + units[_currency] + " " + sentences;
+        //    }
+        //    else
+        //    {
+        //        int getTensCurrency = _currency / 10;
+        //        int getRemainderCurrency = _currency % 10;
+        //        string seperator = _currency % 10 == 0 ? "" : "-";
+        //        tensWords = " and " + tens[getTensCurrency] + seperator + units[getRemainderCurrency] + " " + sentences;
+        //    }
+
+        //    return tensWords.Trim();
+        //}
+
         public string GetDecimalWords(int _decimalNumber)
         {
             string decimalWords;
-            if (_decimalNumber != 0)
-            {
-                string _decimalString = _decimalNumber.ToString();
+            int getDecimalTens = _decimalNumber / 10;
+            int getRemainderDecimal = _decimalNumber % 10;
+            string seperator = _decimalNumber % 10 == 0 ? "" : "-";
 
-                if (_decimalString.Length == 1)
+            try
+            {
+                if (_decimalNumber < 20)
                 {
-                    decimalWords = " and " + units[_decimalNumber] + " " + cent;
+                    decimalWords = " and " + units[_decimalNumber];
                 }
                 else
                 {
-                    int getDecimalTens = (int)Math.Floor(_decimalNumber / 10.0);
-                    int getRemainderDecimal = _decimalNumber % 10;
-                    string seperator = _decimalNumber % 10 == 0 ? "" : "-";
-                    decimalWords = " and " + tens[getDecimalTens] + seperator + units[getRemainderDecimal] + " " + cents;
+                    decimalWords = " and " + tens[getDecimalTens] + seperator + units[getRemainderDecimal];
                 }
             }
-            else
+            catch
             {
                 decimalWords = " ";
             }
+
             return decimalWords.Trim();
         }
         public string ChangeCurrencyToWords(string currency)
         {
+            // validation input number
+            Dictionary<string, double> validNumber = CheckNumber(currency);
 
-            Dictionary<string, int> _currencyString = CheckNumber(currency);
 
-            int _currency = _currencyString["number"];
-            int _decimalNumber = _currencyString["decimalNumber"];
+            // store valid number to variable
+            int _validNumberInt = (int)validNumber["number"];
+            int _validNumberDecimal = (int)validNumber["decimalNumber"];
 
-            if (_currency < 0)
+            // valid number below 0 or equal 0
+            if (_validNumberInt < 0)
             {
                 Console.WriteLine("negative number is not allowed");
-                return "";
             }
 
-            if (_currency == 0)
+            if (_validNumberInt == 0)
             {
                 Console.WriteLine("zero");
-                return "";
             }
 
+            // valid words
             string words = "";
+            string getDollar = _validNumberInt < 2 ? dollar : dollars;
+            string getCent = _validNumberDecimal < 2 ? cent : cents;
 
-            if (_currency < 20)
+            // Change number to words by it's value
+            //if (_validNumberInt < 1000)
+            //{
+            //    int getFirstCharacterOfCurrency = _validNumberInt / 100;
+            //    int getRemainderCurrency = _validNumberInt % 100;
+
+            //    if (_validNumberInt % 100 == 0)
+            //    {
+            //        words = units[getFirstCharacterOfCurrency] + " hundred " + dollars;
+            //    }
+            //    else
+            //    {
+            //        words = units[getFirstCharacterOfCurrency] + " hundred " + GetTensWords(getRemainderCurrency) + " " + GetDecimalWords(_decimalNumber);
+            //    }
+            //}
+
+            if (_validNumberInt < 100)
             {
-                if (_currency == 1)
+                if (_validNumberInt % 10 == 0)
                 {
-                    words = units[_currency] + " " + dollar + " " + GetDecimalWords(_decimalNumber);
+                    words = tens[_validNumberInt / 10];
+                } else
+                {
+                    words = tens[_validNumberInt / 10] + "-" + units[_validNumberInt % 10];
                 }
-                else
+                words += " " + getDollar;
+            }
+
+            if (_validNumberInt < 20)
+            {
+                words = units[_validNumberInt];
+                words += " " + getDollar;
+            }
+
+            // get decimal words
+            if (_validNumberDecimal != 0)
+            {
+                if (words != "")
                 {
-                    words = units[_currency] + " " + dollars + " " + GetDecimalWords(_decimalNumber);
+                    words += " " + GetDecimalWords(_validNumberDecimal) + " " + getCent;
                 }
             }
 
-            if (_currency >= 20 & _currency < 100)
-            {
-                int getTensCurrency = (int)Math.Floor(_currency / 10.0);
-                int getRemainderCurrency = _currency % 10;
-
-                if (_currency == 10)
-                {
-                    words = tens[0] + " " + dollars + " " + GetDecimalWords(_decimalNumber);
-                }
-                else if (_currency == 20)
-                {
-                    words = tens[2] + " " + dollars + " " + GetDecimalWords(_decimalNumber);
-                }
-                else
-                {
-                    words = tens[getTensCurrency] + " " + units[getRemainderCurrency] + " " + dollars + " " + GetDecimalWords(_decimalNumber);
-                }
-            }
-
-            if (_currency >= 100 & _currency < 1000)
-            {
-                int getFirstCharacterOfCurrency = (int)Math.Floor(_currency / 100.0);
-                int getRemainderCurrency = _currency % 100;
-
-                words = units[getFirstCharacterOfCurrency] + " hundred " + GetTensWords(getRemainderCurrency) + " " + GetDecimalWords(_decimalNumber);
-            }
             Console.WriteLine(words.ToUpper());
+
             return words.ToUpper();
         }
         public static void Main()
         {
             CurrencyToWords Usd = new CurrencyToWords();
+
             bool endApp = false;
 
             Console.WriteLine("Console USD Currency To Words in C#\r");
