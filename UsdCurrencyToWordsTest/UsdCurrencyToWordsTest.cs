@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using UsdCurrencyToWords;
+using System;
 
 namespace UsdCurrencyToWordsTest
 {
@@ -8,7 +9,7 @@ namespace UsdCurrencyToWordsTest
     public class UsdCurrencyToWordsTest
     {
         [TestMethod] // 1
-        public void CheckIfUserInputIsEmptyString()
+        public void Check_If_User_Input_Is_Empty_String()
         {
             CurrencyToWords changeCurrencyToWords = new CurrencyToWords();
 
@@ -26,13 +27,13 @@ namespace UsdCurrencyToWordsTest
         }
 
         [TestMethod] // 2
-        public void CheckIfUserInputIsNotAValidNumber()
+        public void Check_If_User_Input_Is_Not_A_Valid_Number_Or_Uncommon_Input()
         {
             CurrencyToWords changeCurrencyToWords = new CurrencyToWords();
 
             try
             {
-                changeCurrencyToWords.ChangeCurrencyToWords("123.4S/*-*/-+@#!#!#@#!##_*&**");
+                changeCurrencyToWords.ChangeCurrencyToWords("sh52425@#!123.4S/*-*/-+@#!#!#@#!##_*&**");
             }
             catch (System.FormatException e)
             {
@@ -44,7 +45,7 @@ namespace UsdCurrencyToWordsTest
         }
 
         [TestMethod] // 3
-        public void CheckIfInputNumberIsInteger()
+        public void Check_If_Input_Number_Is_Integer()
         {
             CurrencyToWords changeCurrencyToWords = new CurrencyToWords();
 
@@ -62,7 +63,7 @@ namespace UsdCurrencyToWordsTest
         }
 
         [TestMethod] // 4
-        public void CheckIfInputNumberIsDecimal()
+        public void Check_If_Input_Number_Is_Decimal()
         {
             CurrencyToWords changeCurrencyToWords = new CurrencyToWords();
 
@@ -80,7 +81,27 @@ namespace UsdCurrencyToWordsTest
         }
 
         [TestMethod] // 5
-        public void CheckIfNumberIsDecimalAndGetTheWords()
+        public void Check_If_Decimal_Digits_More_Than_Two()
+        {
+            CurrencyToWords changeCurrencyToWords = new CurrencyToWords();
+
+            string inputNumber = "123.4512314556422342";
+
+            try
+            {
+                changeCurrencyToWords.ChangeCurrencyToWords(inputNumber);
+            }
+            catch (System.IndexOutOfRangeException e)
+            {
+                StringAssert.Contains(e.Message, "decimal digit is out of range, only accept maximum 2 number (e.g 123.45)");
+                return;
+            }
+
+            Assert.Fail("The expected exception was not thrown.");
+        }
+
+        [TestMethod] // 6
+        public void Check_If_Number_Is_Decimal_And_Get_The_Words()
         {
             CurrencyToWords changeCurrencyToWords = new CurrencyToWords();
 
@@ -94,25 +115,39 @@ namespace UsdCurrencyToWordsTest
             string expectedDoubleDigitWords = "and twenty";
 
             Assert.AreEqual(expectedSingleDigitWords, actualSingleDigitWords);
-            Assert.AreEqual(expectedSingleDigitWords.Contains("cent"), actualSingleDigitWords.Contains("cent"));
             Assert.AreEqual(expectedDoubleDigitWords, actualDoubleDigitWords);
-            Assert.AreEqual(expectedDoubleDigitWords.Contains("cents"), actualDoubleDigitWords.Contains("cents"));
-        }
-
-        [TestMethod] // 6
-        public void GetWordsWhenInputIsValid()
-        {
-            CurrencyToWords usd = new CurrencyToWords();
-            string number = "123.45";
-
-            string actual = usd.ChangeCurrencyToWords(number);
-            string expected = "one hundred and twenty-three dollars and fourty-five cents";
-
-            Assert.AreEqual(expected, actual.ToLower().Trim());
         }
 
         [TestMethod] // 7
-        public void GetCentsWordsIfDecimalValid()
+        public void Get_Words_When_Input_Is_Valid()
+        {
+            CurrencyToWords usd = new CurrencyToWords();
+            List<string> number = new List<string>() { "123.45", "8.1", "8", "24", "100", "1455", "9164914144465131474674987464" };
+            List<string> actual = new List<string>();
+
+
+            number.ForEach(delegate (String inputNumber)
+            {
+                actual.Add(usd.ChangeCurrencyToWords(inputNumber));
+            });
+
+            List<string> expected = new List<string>() {
+                "ONE HUNDRED AND TWENTY-THREE DOLLARS AND FOURTY-FIVE CENTS",
+                "EIGHT DOLLARS AND ONE CENT",
+                "EIGHT DOLLARS",
+                "TWENTY-FOUR DOLLARS",
+                "ONE HUNDRED DOLLARS",
+                "ONE HUNDRED THOUSAND AND FOUR HUNDRED AND FIFTY-FIVE DOLLARS",
+                "NINE HUNDRED OCTILLION AND ONE HUNDRED AND SIXTY-FOUR HUNDRED SEPTILLION AND NINE HUNDRED AND FOURTEEN HUNDRED SEXTILLION AND ONE HUNDRED AND FOURTY-FOUR HUNDRED QUINTILLION AND FOUR HUNDRED AND SIXTY-FIVE HUNDRED QUADRILLION AND ONE HUNDRED AND THIRTY HUNDRED TRILLION AND EIGHT HUNDRED AND TWELVE HUNDRED BILLION AND SIX HUNDRED AND NINETY HUNDRED MILLION AND THREE HUNDRED AND NINETY-NINE HUNDRED THOUSAND AND TWO HUNDRED AND THIRTY-TWO DOLLARS" };
+
+            for (int i = 0; i < actual.Count; i++)
+            {
+                Assert.AreEqual(expected[i].ToLower().Trim(), actual[i]);
+            }
+        }
+
+        [TestMethod] // 8
+        public void Get_Cent_Word_If_Decimal_Is_Valid()
         {
             CurrencyToWords usd = new CurrencyToWords();
             string number = "8.1";
@@ -120,7 +155,7 @@ namespace UsdCurrencyToWordsTest
             string actual = usd.ChangeCurrencyToWords(number);
             string expected = "eight dollars and one cent";
 
-            Assert.AreEqual(expected, actual.ToLower().Trim());
+            Assert.AreEqual(expected.Contains("cent"), actual.ToLower().Trim().Contains("cent"));
         }
     }
 }

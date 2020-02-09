@@ -136,7 +136,6 @@ namespace UsdCurrencyToWords
                 power -= 3;
             }
 
-
             // words for thousand and up
             if (_validNumberInt >= 1000)
             {
@@ -175,11 +174,11 @@ namespace UsdCurrencyToWords
                         else
                         {
                             words += tens[(int)_validNumberInt / 10];
-
                             if ((_validNumberInt % 10) > 0)
                                 words += "-" + units[(int)_validNumberInt % 10];
                         }
                     }
+                    words += " " + getDollar;
                 }
                 catch (IndexOutOfRangeException)
                 {
@@ -212,7 +211,6 @@ namespace UsdCurrencyToWords
             {
                 throw new IndexOutOfRangeException("decimal digit is out of range, only accept maximum 2 number (e.g 123.45)");
             }
-
             return decimalWords.Trim();
         }
 
