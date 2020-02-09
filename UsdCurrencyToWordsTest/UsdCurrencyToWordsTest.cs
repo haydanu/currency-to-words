@@ -92,7 +92,7 @@ namespace UsdCurrencyToWordsTest
             {
                 changeCurrencyToWords.ChangeCurrencyToWords(inputNumber);
             }
-            catch (System.OverflowException e)
+            catch (System.Exception e)
             {
                 StringAssert.Contains(e.Message, "decimal digit is out of range, only accept maximum 2 number (e.g 123.45)");
                 return;

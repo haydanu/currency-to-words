@@ -204,6 +204,10 @@ namespace UsdCurrencyToWords
             {
                 throw new OverflowException("decimal digit is out of range, only accept maximum 2 number (e.g 123.45)");
             }
+            catch (IndexOutOfRangeException)
+            {
+                throw new IndexOutOfRangeException("decimal digit is out of range, only accept maximum 2 number (e.g 123.45)");
+            }
             return decimalWords.Trim();
         }
 
