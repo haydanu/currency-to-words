@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Numerics;
 
 namespace UsdCurrencyToWords
 {
@@ -8,7 +9,7 @@ namespace UsdCurrencyToWords
     {
         private readonly string[] units = { "", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen" };
         private readonly string[] tens = { "", "", "twenty", "thirty", "fourty", "fifty", "sixty", "seventy", "eighty", "ninety" };
-        private readonly string[] largeNumbers = { "thousand", "million", "billion", "trillion", "quadrillion", "quintillion", "sextillion", "septillion", "octillion", "nonillion", "decillion", "undecillion", "duodecillion", "tredecillion", "Quattuordecillion", "Quindecillion", "Sexdecillion", "Septdecillion", "Octodecillion", "Novemdecillion", "Vigintillion" };
+        private readonly string[] largeNumbers = { "thousand", "million", "billion", "trillion", "quadrillion", "quintillion", "sextillion", "septillion", "octillion", "nonillion", "decillion", "undecillion", "duodecillion", "tredecillion", "quattuordecillion", "quindecillion", "sexdecillion", "septdecillion", "octodecillion", "novemdecillion", "vigintillion" };
         private readonly string cent = "cent";
         private readonly string cents = "cents";
         private readonly string dollar = "dollar";
@@ -18,11 +19,12 @@ namespace UsdCurrencyToWords
         {
             // validation input number
             CheckInputNumber(currency);
-            Dictionary<string, double> validNumber = ConvertInputNumber(currency);
+            Dictionary<string, BigInteger> validNumber = ConvertInputNumber(currency);
 
             // store valid number to variable
-            double _validNumberInt = validNumber["number"];
-            double _validNumberDecimal = validNumber["decimalNumber"];
+            BigInteger _validNumberInt = validNumber["number"];
+            BigInteger _validNumberDecimal = validNumber["decimalNumber"];
+            string getDollar = _validNumberInt < 2 ? dollar : dollars;
             string getCent = _validNumberDecimal < 2 ? cent : cents;
 
             // validation for number below 0 or equal 0
@@ -36,16 +38,16 @@ namespace UsdCurrencyToWords
                 Console.WriteLine("zero");
             }
 
-            string words = GetWords(_validNumberInt);
+            string words = GetWords(_validNumberInt) + " " + getDollar;
 
             // get decimal words
-            if (_validNumberDecimal != 0)
-            {
-                if (words != "")
-                {
-                    words += " " + GetDecimalWords(_validNumberDecimal) + " " + getCent;
-                }
-            }
+            // if (_validNumberDecimal != 0)
+            // {
+            //     if (words != "")
+            //     {
+            //         words += " and " + GetDecimalWords(_validNumberDecimal) + " " + getCent;
+            //     }
+            // }
 
             Console.WriteLine(words.ToUpper());
             return words;
@@ -68,15 +70,20 @@ namespace UsdCurrencyToWords
             {
                 throw new FormatException("Input only accept number and following by 2 digits decimal number (e.g 123.45)");
             }
+
+            // give range to input only accept 16 digits
+            //if(currency.Length > 16)
+            //{
+            //    throw new IndexOutOfRangeException("Sorry, only accept 16 digits number");
+            //}
         }
 
-        public Dictionary<string, double> ConvertInputNumber(string currency)
+        public Dictionary<string, BigInteger> ConvertInputNumber(string currency)
         {
-            // change data type to double
-            Dictionary<string, double> _currencyObj = new Dictionary<string, double>();
+            // change data type to double (because range is large) and save it to obj
+            Dictionary<string, BigInteger> _currencyObj = new Dictionary<string, BigInteger>();
             try
             {
-                Console.WriteLine(currency);
                 if (currency.Contains(".") | currency.Contains(","))
                 {
                     Regex decimalPattern = new Regex(@"\b\d+\b");
@@ -84,14 +91,13 @@ namespace UsdCurrencyToWords
 
                     if (matches.Count != 1)
                     {
-
-                        _currencyObj["number"] = double.Parse(matches[0].Value);
-                        _currencyObj["decimalNumber"] = double.Parse(matches[1].Value);
+                        _currencyObj["number"] = BigInteger.Parse(matches[0].Value);
+                        _currencyObj["decimalNumber"] = BigInteger.Parse(matches[1].Value);
                     }
                 }
                 else
                 {
-                    _currencyObj["number"] = double.Parse(currency);
+                    _currencyObj["number"] = BigInteger.Parse(currency);
                     _currencyObj["decimalNumber"] = 0;
                 }
             }
@@ -99,119 +105,112 @@ namespace UsdCurrencyToWords
             {
                 throw new OverflowException("Sorry, exceeds maximum input");
             }
+
             return _currencyObj;
         }
 
-        public string GetWords(double _validNumberInt)
+        public string GetWords(BigInteger _validNumberInt)
         {
-            
             // valid words
             string words = "";
-            string getDollar = _validNumberInt < 2 ? dollar : dollars;
 
-            // To find scales of large number
-            int power = (largeNumbers.Length + 1) * 3;
-            // Console.WriteLine(_validNumberInt);
+            // To find scales of large number multiply by 3
+            int power = (largeNumbers.Length) * 3;
 
+            // iteration every 3 digits of input if input is larger than large number scales
             while (power > 3)
             {
-                double pow = Math.Pow(10, power);
-
+                BigInteger pow = BigInteger.Pow(10, power);
                 if (_validNumberInt >= pow)
                 {
                     if (_validNumberInt % pow > 0)
                     {
-                        words += GetWords(Math.Floor(_validNumberInt / pow)) + " " + largeNumbers[(power / 3) - 1] + " and ";
+                        words += GetWords(BigInteger.Divide(_validNumberInt, pow)) + " " + largeNumbers[(power / 3) - 1] + " and ";
                     }
                     else if (_validNumberInt % pow == 0)
                     {
-                        words += GetWords(Math.Floor(_validNumberInt / pow)) + " " + largeNumbers[(power / 3) - 1];
-                        //return words;
+                        words += GetWords(BigInteger.Divide(_validNumberInt, pow)) + " " + largeNumbers[(power / 3) - 1];
                     }
                     _validNumberInt %= pow;
                 }
                 power -= 3;
             }
 
-            // Console.WriteLine($"ini apa {0}", _validNumberInt);
 
-
+            // words for thousand and up
             if (_validNumberInt >= 1000)
             {
                 if (_validNumberInt % 1000 == 0)
                 {
-                    words += GetWords(Math.Floor(_validNumberInt / 1000)) + " thousand ";
-
+                    words += GetWords(BigInteger.Divide(_validNumberInt, 1000)) + " thousand";
                 }
                 else
                 {
-                    words += GetWords(Math.Floor(_validNumberInt / 1000)) + " thousand and ";
+                    words += GetWords(BigInteger.Divide(_validNumberInt, 1000)) + " thousand and ";
                 }
+
                 _validNumberInt %= 1000;
             }
 
-            // Console.WriteLine($"kok 0 {0}", _validNumberInt);
-
+            // words for thousand and below
             if (_validNumberInt < 1000)
             {
-                Console.WriteLine($"Ini dibagi 100, {Math.Floor(_validNumberInt / 100)}");
-                if (Math.Floor(_validNumberInt / 100) > 0)
-                {
-                    words += GetWords(Math.Floor(_validNumberInt / 100)) + " hundred";
-                    if(_validNumberInt % 100 != 0)
-                    {
-                        words += " and ";
-                    } else
-                    {
-                        words += " " + getDollar;
-                    }
-                    _validNumberInt %= 100;
-                }
 
                 try
                 {
-                    if (_validNumberInt < 20)
+                    if (BigInteger.Divide(_validNumberInt, 100) > 0)
                     {
-                        words += units[(int)_validNumberInt];
+                        words += GetWords(BigInteger.Divide(_validNumberInt, 100)) + " hundred";
+
+                        _validNumberInt %= 100;
                     }
-                    else if (_validNumberInt % 10 == 0)
+
+                    if (_validNumberInt > 0)
                     {
-                        words += tens[(int)_validNumberInt / 10];
-                    }
-                    else
-                    {
-                        words += tens[(int)_validNumberInt / 10] + "-" + units[(int)_validNumberInt % 10];
+                        if (words != "")
+                            words += " and ";
+
+                        if (_validNumberInt < 20)
+                            words += units[(int)_validNumberInt];
+                        else
+                        {
+                            words += tens[(int)_validNumberInt / 10];
+
+                            if ((_validNumberInt % 10) > 0)
+                                words += "-" + units[(int)_validNumberInt % 10];
+                        }
                     }
                 }
                 catch (IndexOutOfRangeException)
                 {
-                    Console.WriteLine("Index is out of range, can't find anything");
+                    throw new IndexOutOfRangeException("Can't find any number. Your input is out of range");
                 }
             }
+
             return words.Trim();
         }
 
         public string GetDecimalWords(double _decimalNumber)
         {
-            string decimalWords;
-            double getDecimalTens = _decimalNumber / 10;
-            double getRemainderDecimal = _decimalNumber % 10;
-            string seperator = _decimalNumber % 10 == 0 ? "" : "-";
+            string decimalWords = "";
 
             try
             {
                 if (_decimalNumber < 20)
                 {
-                    decimalWords = " and " + units[(int)_decimalNumber];
+                    decimalWords += units[(int)_decimalNumber];
                 }
                 else
                 {
-                    decimalWords = " and " + tens[(int)getDecimalTens] + seperator + units[(int)getRemainderDecimal];
+                    decimalWords += tens[(int)_decimalNumber / 10];
+
+                    if ((_decimalNumber % 10) > 0)
+                        decimalWords += "-" + units[(int)_decimalNumber % 10];
                 }
             }
-            catch
+            catch (IndexOutOfRangeException)
             {
-                decimalWords = " ";
+                throw new IndexOutOfRangeException("decimal digit is out of range, only accept maximum 2 number (e.g 123.45)");
             }
 
             return decimalWords.Trim();
@@ -247,14 +246,16 @@ namespace UsdCurrencyToWords
                     if (userInput == "q")
                     {
                         endApp = true;
+                        Console.WriteLine("Thanks, See you again !");
                         break;
                     };
                 }
-                catch (FormatException e)
+                catch (Exception e)
                 {
                     Console.WriteLine(e.Message);
                 }
             }
+
             return;
         }
     }
