@@ -2,6 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using UsdCurrencyToWords;
 using System;
+using System.Numerics;
 
 namespace UsdCurrencyToWordsTest
 {
@@ -51,11 +52,11 @@ namespace UsdCurrencyToWordsTest
 
             string inputNumber = "123";
 
-            Dictionary<string, double> expected = new Dictionary<string, double> { { "number", 123 }, { "decimalNumber", 0 } };
+            Dictionary<string, BigInteger> expected = new Dictionary<string, BigInteger> { { "number", 123 }, { "decimalNumber", 0 } };
 
-            Dictionary<string, double> actual = changeCurrencyToWords.ConvertInputNumber(inputNumber);
+            Dictionary<string, BigInteger> actual = changeCurrencyToWords.ConvertInputNumber(inputNumber);
 
-            foreach (KeyValuePair<string, double> kvp in actual)
+            foreach (KeyValuePair<string, BigInteger> kvp in actual)
             {
                 Assert.AreEqual(expected.ContainsKey(kvp.Key), actual.ContainsKey(kvp.Key));
                 Assert.AreEqual(expected.ContainsValue(kvp.Value), actual.ContainsValue(kvp.Value));
@@ -69,11 +70,11 @@ namespace UsdCurrencyToWordsTest
 
             string inputNumber = "123.45";
 
-            Dictionary<string, double> expected = new Dictionary<string, double> { { "number", 123 }, { "decimalNumber", 45 } };
+            Dictionary<string, BigInteger> expected = new Dictionary<string, BigInteger> { { "number", 123 }, { "decimalNumber", 45 } };
 
-            Dictionary<string, double> actual = changeCurrencyToWords.ConvertInputNumber(inputNumber);
+            Dictionary<string, BigInteger> actual = changeCurrencyToWords.ConvertInputNumber(inputNumber);
 
-            foreach (KeyValuePair<string, double> kvp in actual)
+            foreach (KeyValuePair<string, BigInteger> kvp in actual)
             {
                 Assert.AreEqual(expected.ContainsKey(kvp.Key), actual.ContainsKey(kvp.Key));
                 Assert.AreEqual(expected.ContainsValue(kvp.Value), actual.ContainsValue(kvp.Value));
@@ -91,7 +92,7 @@ namespace UsdCurrencyToWordsTest
             {
                 changeCurrencyToWords.ChangeCurrencyToWords(inputNumber);
             }
-            catch (System.IndexOutOfRangeException e)
+            catch (System.OverflowException e)
             {
                 StringAssert.Contains(e.Message, "decimal digit is out of range, only accept maximum 2 number (e.g 123.45)");
                 return;
@@ -105,14 +106,14 @@ namespace UsdCurrencyToWordsTest
         {
             CurrencyToWords changeCurrencyToWords = new CurrencyToWords();
 
-            double inputSingleDigit = 1;
-            double inputDoubleDigit = 20;
+            BigInteger inputSingleDigit = 1;
+            BigInteger inputDoubleDigit = 20;
 
             string actualSingleDigitWords = changeCurrencyToWords.GetDecimalWords(inputSingleDigit);
             string actualDoubleDigitWords = changeCurrencyToWords.GetDecimalWords(inputDoubleDigit);
 
-            string expectedSingleDigitWords = "and one";
-            string expectedDoubleDigitWords = "and twenty";
+            string expectedSingleDigitWords = "one";
+            string expectedDoubleDigitWords = "twenty";
 
             Assert.AreEqual(expectedSingleDigitWords, actualSingleDigitWords);
             Assert.AreEqual(expectedDoubleDigitWords, actualDoubleDigitWords);
@@ -137,7 +138,7 @@ namespace UsdCurrencyToWordsTest
                 "EIGHT DOLLARS",
                 "TWENTY-FOUR DOLLARS",
                 "ONE HUNDRED DOLLARS",
-                "ONE HUNDRED THOUSAND AND FOUR HUNDRED AND FIFTY-FIVE DOLLARS",
+                "ONE THOUSAND AND FOUR HUNDRED AND FIFTY-FIVE DOLLARS",
                 "ONE SEPTILLION AND TWO HUNDRED AND THIRTY-FOUR SEXTILLION AND FIVE HUNDRED AND SIXTY-SEVEN QUINTILLION AND EIGHT HUNDRED AND NINETY-EIGHT QUADRILLION AND SEVEN HUNDRED AND SIXTY-FIVE TRILLION AND FOUR HUNDRED AND THIRTY-TWO BILLION AND ONE HUNDRED AND TWENTY-THREE MILLION AND FOUR HUNDRED AND FIFTY-SIX THOUSAND AND SEVEN HUNDRED AND EIGHTY-NINE DOLLARS" };
 
             for (int i = 0; i < actual.Count; i++)
