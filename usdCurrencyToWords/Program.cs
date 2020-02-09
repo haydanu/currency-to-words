@@ -41,13 +41,13 @@ namespace UsdCurrencyToWords
             string words = GetWords(_validNumberInt) + " " + getDollar;
 
             // get decimal words
-            // if (_validNumberDecimal != 0)
-            // {
-            //     if (words != "")
-            //     {
-            //         words += " and " + GetDecimalWords(_validNumberDecimal) + " " + getCent;
-            //     }
-            // }
+            if (_validNumberDecimal != 0)
+            {
+                if (words != "")
+                {
+                    words += " and " + GetDecimalWords(_validNumberDecimal) + " " + getCent;
+                }
+            }
 
             Console.WriteLine(words.ToUpper());
             return words;
@@ -70,12 +70,6 @@ namespace UsdCurrencyToWords
             {
                 throw new FormatException("Input only accept number and following by 2 digits decimal number (e.g 123.45)");
             }
-
-            // give range to input only accept 16 digits
-            //if(currency.Length > 16)
-            //{
-            //    throw new IndexOutOfRangeException("Sorry, only accept 16 digits number");
-            //}
         }
 
         public Dictionary<string, BigInteger> ConvertInputNumber(string currency)
@@ -178,7 +172,6 @@ namespace UsdCurrencyToWords
                                 words += "-" + units[(int)_validNumberInt % 10];
                         }
                     }
-                    words += " " + getDollar;
                 }
                 catch (IndexOutOfRangeException)
                 {
@@ -189,7 +182,7 @@ namespace UsdCurrencyToWords
             return words.Trim();
         }
 
-        public string GetDecimalWords(double _decimalNumber)
+        public string GetDecimalWords(BigInteger _decimalNumber)
         {
             string decimalWords = "";
 
