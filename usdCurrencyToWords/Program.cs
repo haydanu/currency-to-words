@@ -200,9 +200,9 @@ namespace UsdCurrencyToWords
                         decimalWords += "-" + units[(int)_decimalNumber % 10];
                 }
             }
-            catch (IndexOutOfRangeException)
+            catch (OverflowException)
             {
-                throw new IndexOutOfRangeException("decimal digit is out of range, only accept maximum 2 number (e.g 123.45)");
+                throw new OverflowException("decimal digit is out of range, only accept maximum 2 number (e.g 123.45)");
             }
             return decimalWords.Trim();
         }
