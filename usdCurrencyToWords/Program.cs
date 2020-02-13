@@ -87,10 +87,10 @@ namespace UsdCurrencyToWords
                 if (currency.StartsWith(".") | currency.StartsWith(","))
                 {
 
-                    string modifiedCurrency = currency.Replace(".",",");
+                    string modifiedCurrency = currency.Replace(".", ",");
                     double roundedCurrency = Math.Round(double.Parse(modifiedCurrency), 2);
 
-                    MatchCollection matches = decimalPattern.Matches(roundedCurrency.ToString());
+                    MatchCollection matches = decimalPattern.Matches(roundedCurrency.ToString("0.00"));
 
                     if (matches.Count != 1)
                     {
@@ -204,6 +204,16 @@ namespace UsdCurrencyToWords
         public string GetDecimalWords(BigInteger _decimalNumber)
         {
             string decimalWords = "";
+            string modifiedDecimalNumber = _decimalNumber.ToString();
+            if(modifiedDecimalNumber.Length > 2)
+            {
+                string firstStringThreeDigits = modifiedDecimalNumber.ToString().Substring(0, 3);
+                double firstThreeDigits = double.Parse(firstStringThreeDigits);
+                double roundResult = Math.Round(firstThreeDigits / 1000, 2);
+
+                _decimalNumber = BigInteger.Parse(roundResult.ToString().Substring(2));
+            }
+            
 
             try
             {
