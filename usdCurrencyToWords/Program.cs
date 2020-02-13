@@ -33,12 +33,13 @@ namespace UsdCurrencyToWords
                 Console.WriteLine("negative number is not allowed");
             }
 
+            string words = GetWords(_validNumberInt) + " " + getDollar;
+
             if (_validNumberInt == 0)
             {
-                Console.WriteLine("zero");
+                words = "";
             }
 
-            string words = GetWords(_validNumberInt) + " " + getDollar;
 
             // get decimal words
             if (_validNumberDecimal != 0)
@@ -46,6 +47,9 @@ namespace UsdCurrencyToWords
                 if (words != "")
                 {
                     words += " and " + GetDecimalWords(_validNumberDecimal) + " " + getCent;
+                } else
+                {
+                    words = GetDecimalWords(_validNumberDecimal) + " " + getCent;
                 }
             }
 
@@ -76,11 +80,26 @@ namespace UsdCurrencyToWords
         {
             // change data type to double (because range is large) and save it to obj
             Dictionary<string, BigInteger> _currencyObj = new Dictionary<string, BigInteger>();
+            Regex decimalPattern = new Regex(@"\b\d+\b");
+
             try
             {
-                if (currency.Contains(".") | currency.Contains(","))
+                if (currency.StartsWith(".") | currency.StartsWith(","))
                 {
-                    Regex decimalPattern = new Regex(@"\b\d+\b");
+
+                    string modifiedCurrency = currency.Replace(".",",");
+                    double roundedCurrency = Math.Round(double.Parse(modifiedCurrency), 2);
+
+                    MatchCollection matches = decimalPattern.Matches(roundedCurrency.ToString());
+
+                    if (matches.Count != 1)
+                    {
+                        _currencyObj["number"] = BigInteger.Parse(matches[0].Value);
+                        _currencyObj["decimalNumber"] = BigInteger.Parse(matches[1].Value);
+                    }
+                }
+                else if (currency.Contains(".") | currency.Contains(","))
+                {
                     MatchCollection matches = decimalPattern.Matches(currency);
 
                     if (matches.Count != 1)
