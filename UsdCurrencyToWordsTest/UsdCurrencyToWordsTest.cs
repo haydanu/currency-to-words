@@ -9,14 +9,13 @@ namespace UsdCurrencyToWordsTest
     [TestClass]
     public class UsdCurrencyToWordsTest
     {
-        [TestMethod] // 1
+        private readonly CurrencyToWords usd = new CurrencyToWords();
+        [TestMethod]
         public void Check_If_User_Input_Is_Empty_String()
         {
-            CurrencyToWords changeCurrencyToWords = new CurrencyToWords();
-
             try
             {
-                changeCurrencyToWords.ChangeCurrencyToWords("");
+                usd.ChangeCurrencyToWords("");
             }
             catch (System.FormatException e)
             {
@@ -27,34 +26,30 @@ namespace UsdCurrencyToWordsTest
             Assert.Fail("The expected exception was not thrown.");
         }
 
-        [TestMethod] // 2
+        [TestMethod]
         public void Check_If_User_Input_Is_Not_A_Valid_Number_Or_Uncommon_Input()
         {
-            CurrencyToWords changeCurrencyToWords = new CurrencyToWords();
-
             try
             {
-                changeCurrencyToWords.ChangeCurrencyToWords("sh52425@#!123.4S/*-*/-+@#!#!#@#!##_*&**");
+                usd.ChangeCurrencyToWords("sh52425@#!123.4S/*-*/-+@#!#!#@#!##_*&**");
             }
             catch (System.FormatException e)
             {
-                StringAssert.Contains(e.Message, "Input only accept number and following by 2 digits decimal number (e.g 123.45)");
+                StringAssert.Contains(e.Message, "Input accepts only a number format followed by 2 digits decimal numbers (e.g. 123.45)");
                 return;
             }
 
             Assert.Fail("The expected exception was not thrown.");
         }
 
-        [TestMethod] // 3
-        public void Check_If_Input_Number_Is_Integer()
+        [TestMethod]
+        public void Check_If_Input_Number_Is_Valid()
         {
-            CurrencyToWords changeCurrencyToWords = new CurrencyToWords();
-
             string inputNumber = "123";
 
             Dictionary<string, BigInteger> expected = new Dictionary<string, BigInteger> { { "number", 123 }, { "decimalNumber", 0 } };
 
-            Dictionary<string, BigInteger> actual = changeCurrencyToWords.ConvertInputNumber(inputNumber);
+            Dictionary<string, BigInteger> actual = usd.ConvertInputNumber(inputNumber);
 
             foreach (KeyValuePair<string, BigInteger> kvp in actual)
             {
@@ -63,16 +58,14 @@ namespace UsdCurrencyToWordsTest
             }
         }
 
-        [TestMethod] // 4
-        public void Check_If_Input_Number_Is_Decimal()
+        [TestMethod]
+        public void Check_If_Input_Number_With_Decimal_Is_Valid()
         {
-            CurrencyToWords changeCurrencyToWords = new CurrencyToWords();
-
             string inputNumber = "123.45";
 
             Dictionary<string, BigInteger> expected = new Dictionary<string, BigInteger> { { "number", 123 }, { "decimalNumber", 45 } };
 
-            Dictionary<string, BigInteger> actual = changeCurrencyToWords.ConvertInputNumber(inputNumber);
+            Dictionary<string, BigInteger> actual = usd.ConvertInputNumber(inputNumber);
 
             foreach (KeyValuePair<string, BigInteger> kvp in actual)
             {
@@ -81,36 +74,32 @@ namespace UsdCurrencyToWordsTest
             }
         }
 
-        [TestMethod] // 5
-        public void Check_If_Decimal_Digits_More_Than_Two()
+        [TestMethod]
+        public void Check_If_Decimal_Digits_More_Than_Two_Digits()
         {
-            CurrencyToWords changeCurrencyToWords = new CurrencyToWords();
-
             string inputNumber = "123.4512314556422342";
 
             try
             {
-                changeCurrencyToWords.ChangeCurrencyToWords(inputNumber);
+                usd.ChangeCurrencyToWords(inputNumber);
             }
             catch (System.Exception e)
             {
-                StringAssert.Contains(e.Message, "decimal digit is out of range, only accept maximum 2 number (e.g 123.45)");
+                StringAssert.Contains(e.Message, "Decimal digits is out of range, only accept maximum 2 number (e.g. 123.45)");
                 return;
             }
 
             Assert.Fail("The expected exception was not thrown.");
         }
 
-        [TestMethod] // 6
+        [TestMethod]
         public void Check_If_Number_Is_Decimal_And_Get_The_Words()
         {
-            CurrencyToWords changeCurrencyToWords = new CurrencyToWords();
-
             BigInteger inputSingleDigit = 1;
             BigInteger inputDoubleDigit = 20;
 
-            string actualSingleDigitWords = changeCurrencyToWords.GetDecimalWords(inputSingleDigit);
-            string actualDoubleDigitWords = changeCurrencyToWords.GetDecimalWords(inputDoubleDigit);
+            string actualSingleDigitWords = usd.GetDecimalWords(inputSingleDigit);
+            string actualDoubleDigitWords = usd.GetDecimalWords(inputDoubleDigit);
 
             string expectedSingleDigitWords = "one";
             string expectedDoubleDigitWords = "twenty";
@@ -119,13 +108,11 @@ namespace UsdCurrencyToWordsTest
             Assert.AreEqual(expectedDoubleDigitWords, actualDoubleDigitWords);
         }
 
-        [TestMethod] // 7
+        [TestMethod]
         public void Get_Words_When_Input_Is_Valid()
         {
-            CurrencyToWords usd = new CurrencyToWords();
             List<string> number = new List<string>() { "123.45", "8.1", "8", "24", "100", "1455", "1234567898765432123456789" };
             List<string> actual = new List<string>();
-
 
             number.ForEach(delegate (String inputNumber)
             {
@@ -147,16 +134,43 @@ namespace UsdCurrencyToWordsTest
             }
         }
 
-        [TestMethod] // 8
+        [TestMethod]
         public void Get_Cent_Word_If_Decimal_Is_Valid()
         {
-            CurrencyToWords usd = new CurrencyToWords();
             string number = "8.1";
 
             string actual = usd.ChangeCurrencyToWords(number);
             string expected = "eight dollars and one cent";
 
             Assert.AreEqual(expected.Contains("cent"), actual.ToLower().Trim().Contains("cent"));
+        }
+
+        [TestMethod]
+        public void Max_Value_Check()
+        {
+            BigInteger maximumValue = (BigInteger)Math.Pow(10, 63);
+
+            string actual = usd.ChangeCurrencyToWords(maximumValue.ToString());
+            string expected = "one vigintillion and fifty-seven quattuordecillion and eight hundred and fifty-seven tredecillion and nine hundred and fifty-nine duodecillion and nine hundred and fourty-two undecillion and seven hundred and twenty-six decillion and nine hundred and sixty-nine nonillion and eight hundred and twenty-seven octillion and three hundred and ninety-three septillion and three hundred and seventy-eight sextillion and six hundred and eighty-nine quintillion and one hundred and seventy-five quadrillion and fourty trillion and four hundred and thirty-eight billion and one hundred and seventy-two million and six hundred and fourty-seven thousand and four hundred and twenty-four dollars";
+
+            Assert.AreEqual(expected, actual.ToLower().Trim());
+        }
+
+        [TestMethod]
+
+        public void Input_Negative_Number()
+        {
+            try
+            {
+                usd.ChangeCurrencyToWords("-1");
+            }
+            catch (System.FormatException e)
+            {
+                StringAssert.Contains(e.Message, "Negative number is not allowed");
+                return;
+            }
+
+            Assert.Fail("The expected exception was not thrown.");
         }
     }
 }
