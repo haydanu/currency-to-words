@@ -157,7 +157,6 @@ namespace UsdCurrencyToWordsTest
         }
 
         [TestMethod]
-
         public void Input_Negative_Number()
         {
             try

@@ -100,11 +100,15 @@ namespace UsdCurrencyToWords
                 else if (currency.Contains(".") | currency.Contains(","))
                 {
                     MatchCollection matches = decimalPattern.Matches(currency);
-
+                    
                     if (matches.Count != 1)
                     {
                         _currencyObj["number"] = BigInteger.Parse(matches[0].Value);
                         _currencyObj["decimalNumber"] = BigInteger.Parse(matches[1].Value);
+                    } else
+                    {
+                        _currencyObj["number"] = BigInteger.Parse(matches[0].Value);
+                        _currencyObj["decimalNumber"] = 0;
                     }
                 }
                 else
